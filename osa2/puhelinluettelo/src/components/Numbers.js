@@ -1,14 +1,16 @@
 import React from 'react'
 
-const PersonLine = ({person}) => {
+const PersonLine = ({person, removePerson}) => {
     return(
       <div>
-        {person.name} {person.number}
+        {person.name} {person.number} 
+        <button type="button" onClick={() => removePerson(person.id)}>
+          delete</button>
       </div>
     )
   }
 
-const Numbers = ({filter, persons}) => {
+const Numbers = ({filter, persons, removePerson}) => {
 
     const personsToShow = filter === ''
     ? persons
@@ -17,7 +19,7 @@ const Numbers = ({filter, persons}) => {
     return (
     <div>
         {personsToShow.map(person => 
-        <PersonLine key={person.id} person={person} />
+        <PersonLine key={person.id} person={person} removePerson={removePerson} />
         )}
     </div>
     )

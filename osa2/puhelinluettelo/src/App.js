@@ -1,16 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
 import Numbers from './components/Numbers'
 import AddPerson from './components/AddPerson'
 import Filter from './components/Filter'
+import personService from './components/PersonService'
 
-const hook = (setPersonData) => {
-  axios
-    .get('http://localhost:3001/persons')
-    .then(response => {
-      setPersonData(response.data)
-    })
-}
+
 
 const App = () => {
   const [persons, setPersons] = useState([]) 
@@ -30,26 +24,61 @@ const App = () => {
     setFilter(event.target.value)
   }
 
-  const handleAddPerson = (event) => {
-    event.preventDefault()
-    const names = persons.map(p => p.name)
+  const handleRemovePerson = (id) => {
 
-    if(names.indexOf(newName) >= 0)
-    {
-      alert(`${newName} is already added to phonebook`)
+    const name = persons.filter(person => person.id === id).map(person => person.name)
+    if(!window.confirm(`Delete ${name}?`)) { 
       return
     }
 
-    const newValue = { 
-      id: persons.length + 1, 
-      name: newName, 
-      number: newNumber }
-    setPersons(persons.concat(newValue))
-    setNewName('')
-    setNewNumber('')
+    personService.remove(id)
+      .then(() => {
+        setPersons(persons.filter(person => person.id !== id))
+      })
   }
 
-  useEffect(() => {hook(setPersons)}, [])
+  const handleAddPerson = (event) => {
+    event.preventDefault()
+    const names = persons.map(p => p.name)
+    const foundIdx = names.indexOf(newName)
+
+    const newPerson = { name: newName, 
+      number: newNumber }
+
+    if(foundIdx < 0)
+    {
+      personService
+      .create(newPerson)
+        .then(returnedPerson => {
+          setPersons(persons.concat(returnedPerson))
+          setNewName('')
+          setNewNumber('')
+      })
+
+      return
+    }
+
+    const result = window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)
+      
+    if(result)
+    {
+      const id = persons[foundIdx].id
+      personService.update(id, newPerson)
+        .then(returnedPerson => {
+          setPersons(persons.map(person => person.id !== id ? person : returnedPerson))
+        })
+    }
+
+  }
+
+  const getHook = (setPersonData) => {
+    personService.getAll()
+      .then(persons => {
+        setPersonData(persons)
+      })
+  }
+
+  useEffect(() => {getHook(setPersons)}, [])
 
   return (
     <div>
@@ -60,7 +89,7 @@ const App = () => {
         newName={newName} onChangeName={handleNameChange}
         newNumber={newNumber} onChangeNumber={handleNumberChange} />
       <h3>Numbers</h3>
-      <Numbers filter={filter} persons={persons}/>
+      <Numbers filter={filter} persons={persons} removePerson={handleRemovePerson}/>
     </div>
   )
 
