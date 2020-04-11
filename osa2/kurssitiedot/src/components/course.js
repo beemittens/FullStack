@@ -27,7 +27,7 @@ const Header = ({course}) => {
     return (
       <div>
           {parts.map(part =>
-              <Part part = {part} />
+              <Part key={part.id} part = {part} />
           )}
       </div>
     )
@@ -35,7 +35,7 @@ const Header = ({course}) => {
   
   const Total = ({parts}) => {
   
-    const exercisesTotal = parts.reduce( (s, p) => {
+    const exercisesTotal = parts.reduce((s, p) => {
       return s + p.exercises
     }, 0)
   
