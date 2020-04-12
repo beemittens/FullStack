@@ -1,9 +1,19 @@
 {
   "persons": [
     {
-      "name": "345345",
-      "number": "345345",
-      "id": 9
+      "name": "Jarkko Hairus",
+      "number": "0405123684",
+      "id": 1
+    },
+    {
+      "name": "Mikko Paattinen",
+      "number": "5576567",
+      "id": 2
+    },
+    {
+      "name": "Jukka Möttönen",
+      "number": "776755",
+      "id": 3
     }
   ]
 }
