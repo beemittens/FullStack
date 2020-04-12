@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react'
+import './index.css'
 import Numbers from './components/Numbers'
 import AddPerson from './components/AddPerson'
 import Filter from './components/Filter'
+import Notification from './components/Notification'
+import ErrorNotification from './components/ErrorNotification'
 import personService from './components/PersonService'
-
 
 
 const App = () => {
@@ -11,6 +13,8 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
+  const [message, setMessage] = useState(null)
+  const [errorMessage, setErrorMessage] = useState(null)
 
   const handleNameChange = (event) => {
     setNewName(event.target.value)
@@ -34,6 +38,11 @@ const App = () => {
     personService.remove(id)
       .then(() => {
         setPersons(persons.filter(person => person.id !== id))
+        setMessage(`Deleted ${name}`)
+      })
+      .catch(error => {
+        setErrorMessage(`Information of ${name} was already removed from server`)
+        setPersons(persons.filter(person => person.id !== id))
       })
   }
 
@@ -53,22 +62,26 @@ const App = () => {
           setPersons(persons.concat(returnedPerson))
           setNewName('')
           setNewNumber('')
+          setMessage(`Added ${returnedPerson.name}`)
       })
 
       return
     }
-
-    const result = window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)
       
-    if(result)
+    if(window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`))
     {
       const id = persons[foundIdx].id
       personService.update(id, newPerson)
         .then(returnedPerson => {
           setPersons(persons.map(person => person.id !== id ? person : returnedPerson))
+          setMessage(`Updated ${returnedPerson.name}`)
+        })
+        .catch(error => {
+          console.log(error)
+          setErrorMessage(`Information of ${newName} was already removed from server`)
+          setPersons(persons.filter(person => person.id !== id))
         })
     }
-
   }
 
   const getHook = (setPersonData) => {
@@ -83,6 +96,8 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={message} setMessage={setMessage} />
+      <ErrorNotification message={errorMessage} setMessage={setErrorMessage} />
       <Filter filter={filter} onFilterChanged={handleFilterChange}/>
       <h2>add a new</h2>
       <AddPerson addPerson={handleAddPerson} 
