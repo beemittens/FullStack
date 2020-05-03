@@ -51,24 +51,26 @@ const App = () => {
     const names = persons.map(p => p.name)
     const foundIdx = names.indexOf(newName)
 
-    const newPerson = { name: newName, 
-      number: newNumber }
+    const newPerson = { 
+      name: newName, 
+      number: newNumber 
+    }
 
     if(foundIdx < 0)
     {
-      personService
-      .create(newPerson)
+      personService.create(newPerson)
         .then(returnedPerson => {
           setPersons(persons.concat(returnedPerson))
           setNewName('')
           setNewNumber('')
           setMessage(`Added ${returnedPerson.name}`)
-      })
+        })
+        .catch(error => {
+          console.log(error.response.data.error)
+          setErrorMessage(error.response.data.error)
+        })
 
-      return
-    }
-      
-    if(window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`))
+    } else if(window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`))
     {
       const id = persons[foundIdx].id
       personService.update(id, newPerson)
